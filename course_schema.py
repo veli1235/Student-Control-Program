@@ -10,10 +10,18 @@ class CourseCreateSchema(BaseModel):
 
 
 class CourseDeleteSchema(BaseModel):
-    id : int
+    course_id : int
     class Config:
         extra = "forbid"
 
 class CourseRegisterSchema(BaseModel):
-    course_name : str
+    course_id : int
     FIN_code : str
+    class Config:
+        extra = "forbid"
+
+class RegisteredStudentDeleteSchema(BaseModel):
+    course_name : str
+    student_id: int
+    class Config:
+        extra = "forbid"

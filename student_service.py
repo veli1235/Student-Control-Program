@@ -34,7 +34,7 @@ def get_user_by_id_from_db(*,id : int,db : Session, current_user = Depends(get_c
     
     register_course = db.query(StudentCourseRegistration).filter(StudentCourseRegistration.name == student.name, StudentCourseRegistration.is_deleted == False).all()
     if not register_course:
-        result1 = "null"
+        result1 = "His student has not registered for any course"
         a = student.name
         for i in student.name:
             if i.isdigit():
