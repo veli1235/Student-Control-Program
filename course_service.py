@@ -17,8 +17,9 @@ def get_all_course_from_db(db : Session, current_user = Depends(get_current_user
     courses = db.query(Course).filter(Course.is_deleted == False).all()
     lst = []
     for course in courses:
-            if not course.course_name in lst:
-                lst.append(course.course_name)
+        course_name = ''.join([char for char in course.course_name if  not char.isdigit()])
+        if not course_name in lst:
+            lst.append(course_name)
     return lst
         
 
@@ -37,33 +38,35 @@ def create_course_in_db(data: CourseCreateSchema,db:Session, current_user = Depe
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
             raise HTTPException(status_code=401,detail="This function is only for admins")
-    course_id = db.query(Course).filter(Course.id != None).order_by(desc(Course.id)).first()
-    if course_id is None:
-        n = "1"
-    else:
-        n = str(course_id.id+1)
-    new_course = Course(teacher_id = data.teacher_id, course_name = data.course_name+n, description = data.description, is_deleted = False)   
-    course_name = ''.join([char for char in new_course.course_name if not char.isdigit()])
-    name = db.query(Course).filter(teacher_id = data.teacher_id, course_name = data.course_name, is_deleted = False).first()
-    name1 = name.course_name
-    course = db.query(Course).filter_by(teacher_id = data.teacher_id,course_name =  name1, is_deleted = False).first()
-    if course:
-        raise HTTPException(status_code=404,detail="this course already created")
     teacher = db.query(User).filter_by(id = data.teacher_id, role = "lecturer", is_deleted = False).first()
     if not teacher:
         raise UserNotFound()
-    course1 = db.query(Course).filter_by(teacher_id = data.teacher_id,course_name = data.course_name+n, is_deleted = True).first()
-    if course1:
-        course1.is_deleted = False
-        course1.teacher_id = data.teacher_id
-        course1.course_name = data.course_name
-        course1.description = data.description
+    name = db.query(Course).filter(Course.teacher_id == data.teacher_id).first()
+    
+    if name:
+        name1 = ''.join([char for char in name.course_name if  char.isdigit()])
+        course = db.query(Course).filter(Course.teacher_id == data.teacher_id, Course.course_name == data.course_name+name1).first()
+        if course.is_deleted == False:
+            raise HTTPException(status_code=404,detail="this course has already created")
+        elif course.is_deleted == True:
+            course.is_deleted = False
+            course.teacher_id = data.teacher_id
+            course.course_name = data.course_name+name1
+            course.description = data.description
+            db.commit()
+            return {"msg":"This course is created"}
+    else:
+        course_id = db.query(Course).filter(Course.id != None).order_by(desc(Course.id)).first()
+        if course_id is None:
+            n = "1"
+        else:
+            n = str(course_id.id+1)
+        new_course = Course(teacher_id = data.teacher_id, course_name = data.course_name+n, description = data.description, is_deleted = False)
+        db.add(new_course)
         db.commit()
-        return {"msg":"This course is created"}
-    db.add(new_course)
-    db.commit()
-    db.refresh(new_course)
-    return {"msg":"this course is created"}
+        db.refresh(new_course)
+        return {"msg":"this course is created"}
+        
 
 def register_course_in_db(data : CourseRegisterSchema, db : Session,current_user = Depends(get_current_user)):
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
@@ -76,7 +79,12 @@ def register_course_in_db(data : CourseRegisterSchema, db : Session,current_user
     name1 = name.name
     course = db.query(Course).filter(Course.id == data.course_id, Course.is_deleted == False).first()
     new_student_in_course = StudentCourseRegistration(course_name = course.course_name, name = name1, is_deleted = False)
-    student_in_course = db.query(StudentCourseRegistration).filter_by(course_name = new_student_in_course.course_name, name = name1).first()
+    courses = db.query(Course).filter(Course.is_deleted == False).all()
+    for course in courses:
+        course_name = ''.join([char for char in course.course_name if  not char.isdigit()])
+    name = db.query(Course).filter(Course.id == data.course_id).first()
+    name2 = ''.join([char for char in name.course_name if  char.isdigit()])
+    student_in_course = db.query(StudentCourseRegistration).filter(StudentCourseRegistration.course_name == course_name+name2, StudentCourseRegistration.name == name1).first()
     if student_in_course : 
        raise HTTPException(status_code=404,detail="this student has already registered in this course")
     if  not course :

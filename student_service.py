@@ -39,14 +39,15 @@ def get_user_by_id_from_db(*,id : int,db : Session, current_user = Depends(get_c
         for i in student.name:
             if i.isdigit():
                 b = a.replace(i, "")
+        
         return {"name":b,"surname":student.surname,"birthdate":student.birthdate,"course_name":result1}
         
     else:
         result = ", ".join(i.course_name for i in register_course)
-        a = student.name
+        end = "".join([char for char in result if not char.isdigit()])
         for i in register_course:
             name = ''.join([char for char in i.name if not char.isdigit()])
-        return {"name":name,"surname":student.surname,"birthdate":student.birthdate,"course_name":result}
+        return {"name":name,"surname":student.surname,"birthdate":student.birthdate,"course_name":end}
 
 
 
