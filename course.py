@@ -15,8 +15,8 @@ def get_all_course(db : Session = Depends(get_db),current_user = Depends(get_cur
     return message
 
 @course_router.get("/course_info_for_lecturers{course_id}")
-def get_course_info(teacher_id : int, db : Session = Depends(get_db)):
-    message = get_course_info_from_db(teacher_id = teacher_id , db = db)
+def get_course_info(course_id : int, db : Session = Depends(get_db),current_user = Depends(get_current_user)):
+    message = get_course_info_from_db(course_id = course_id , db = db,current_user = current_user)
     return message
 
 @course_router.post("/course")

@@ -30,7 +30,7 @@ def get_course_info_from_db(*,course_id : int, db : Session, current_user = Depe
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "admin":
-            raise WrongRole
+            raise HTTPException(status_code=404,detail="This function is only for lecturers")
     course = db.query(Course).filter(Course.id == course_id, Course.is_deleted == False).first()
     if not course:
         raise CourseNotFound
