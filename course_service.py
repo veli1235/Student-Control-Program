@@ -130,27 +130,41 @@ def register_course_in_db(data: CourseRegisterSchema, db: Session, current_user 
         raise CourseNotFound
     existing_registration = db.query(StudentCourseRegistration).filter(
         StudentCourseRegistration.course_name == data.course_name,
-        StudentCourseRegistration.id == data.course_id,
+        StudentCourseRegistration.name == student.name,
         StudentCourseRegistration.is_deleted == False
     ).first()
     if existing_registration:
         raise HTTPException(status_code=404,detail="this registration have in database")
     name = ''.join([char for char in data.course_name if not char.isdigit()])
-    for k in courses:
-        name1 = ''.join([char for char in k.course_name if not char.isdigit()])
-    if name == name1:
-        raise HTTPException(status_code=404,detail="this registration have in database")
-    
-    new_student_in_course = StudentCourseRegistration(
-    course_name=data.course_name,
-    name=student.name,  
-    is_deleted=False
-    )
-            
-    db.add(new_student_in_course)
-    db.commit()
-    db.refresh(new_student_in_course)
-    return  {"msg":"this student registered in this course"}
+    course = db.query(StudentCourseRegistration).filter(StudentCourseRegistration.name == student.name, StudentCourseRegistration.is_deleted == False).first()
+    if course:
+        for k in  course.course_name:
+            name1 = ''.join([char if char != 'İ' else 'I' for char in course.course_name if char.isalpha()])
+            print(name)
+            print(name1)
+            if name == name1:
+                raise HTTPException(status_code=404,detail="This registration have in database")
+            else:
+                new_student_in_course = StudentCourseRegistration(
+                course_name=data.course_name,
+                name=student.name,  
+                is_deleted=False
+                )
+                db.add(new_student_in_course)
+                db.commit()
+                db.refresh(new_student_in_course)
+                return  {"msg":"this registraron is created"}
+    else:
+        new_student_in_course = StudentCourseRegistration(
+                course_name=data.course_name,
+                name=student.name,  
+                is_deleted=False
+                )
+                        
+        db.add(new_student_in_course)
+        db.commit()
+        db.refresh(new_student_in_course)
+        return  {"msg":"this registraron is created"}
 
         
         
@@ -173,17 +187,3 @@ def delete_course_in_db(data : CourseDeleteSchema, db : Session,current_user = D
     db.commit()
     return {"msg":"Course is deleted"}
 
-
-def deleted_registered_student_from_db(data : RegisteredStudentDeleteSchema,db : Session, current_user = Depends(get_current_user)):
-    user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
-    if current_user["username"] == user.username:
-        if user.role  == "lecturer":
-            raise WrongRole
-    student = db.query(Student).filter(Student.id == data.student_id, Student.is_deleted == False).first()
-    registered_student = db.query(StudentCourseRegistration).filter(StudentCourseRegistration.course_name == data.course_name, StudentCourseRegistration.name== student.name, StudentCourseRegistration.is_deleted == False).first()
-    if not registered_student :
-        raise StudentNotFound
-    else:
-        registered_student.is_deleted = True
-        db.commit()
-        return {"msg":"this student deleted in student course registration database"}

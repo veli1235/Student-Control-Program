@@ -16,7 +16,7 @@ class CourseDeleteSchema(BaseModel):
         extra = "forbid"
 
 class CourseRegisterSchema(BaseModel):
-    course_id : int
+   
     course_name : str
     FIN_code : str
     class Config:

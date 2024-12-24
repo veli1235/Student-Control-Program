@@ -2,7 +2,7 @@
 from fastapi import APIRouter,Depends
 from sqlalchemy.orm import Session
 from db import get_db
-from course_service import get_all_course_from_db,create_course_in_db,delete_course_in_db,register_course_in_db,get_course_info_from_db, deleted_registered_student_from_db
+from course_service import get_all_course_from_db,create_course_in_db,delete_course_in_db,register_course_in_db,get_course_info_from_db
 from course_schema import CourseCreateSchema, CourseDeleteSchema, CourseRegisterSchema, RegisteredStudentDeleteSchema
 from jwt import get_current_user
  
@@ -34,7 +34,4 @@ def delete_course(item : CourseDeleteSchema,db : Session = Depends(get_db),curre
     message = delete_course_in_db(data = item, db = db,current_user = current_user)
     return message
 
-@course_router.delete("/course")
-def delete_registration(item : RegisteredStudentDeleteSchema, db:Session = Depends(get_db), current_user = Depends(get_current_user)):
-    message = deleted_registered_student_from_db(data = item, db = db, current_user = current_user)
-    return message
+
