@@ -1,3 +1,4 @@
+
 from pydantic import BaseModel
 
 
@@ -16,6 +17,7 @@ class CourseDeleteSchema(BaseModel):
 
 class CourseRegisterSchema(BaseModel):
     course_id : int
+    course_name : str
     FIN_code : str
     class Config:
         extra = "forbid"

@@ -4,6 +4,7 @@ from student_schema import StudentCreateSchema, StudentDeleteSchema
 from model import User,Student,Course,StudentCourseRegistration
 from fastapi import HTTPException,Depends
 from student_exception import *
+from user_exception import WrongRole
 import  psycopg2 
 from setting import DATABASE_URL 
 from jwt import get_current_user
@@ -13,7 +14,7 @@ def get_all_student_from_db(*,db : Session, current_user = Depends(get_current_u
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
-            raise HTTPException(status_code=401,detail="This function is only for admins")
+            raise WrongRole
     lst = []
     student = db.query(Student).filter(Student.is_deleted == False).all()
     for i in student:
@@ -27,7 +28,7 @@ def get_user_by_id_from_db(*,id : int,db : Session, current_user = Depends(get_c
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
-            raise HTTPException(status_code=401,detail="This function is only for admins")
+            raise WrongRole
     student = db.query(Student).filter(Student.id == id, Student.is_deleted == False).first()
     if not student:
         raise StudentNotFound()
@@ -55,7 +56,7 @@ def create_student_in_db(data: StudentCreateSchema,db:Session,current_user = Dep
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
-            raise HTTPException(status_code=401,detail="This function is only for admins")
+            raise WrongRole
     student_id = db.query(Student).filter(Student.id != None ).order_by(desc(Student.id)).first()
     if student_id is None:
         n = "1"
@@ -84,7 +85,7 @@ def delete_student_in_db(*,data:StudentDeleteSchema,db:Session, current_user = D
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
-            raise HTTPException(status_code=401,detail="This function is only for admins")
+            raise WrongRole
     student_in_db = db.query(Student).filter(Student.id==data.id, Student.is_deleted == False).update({"is_deleted":True})
     if  not student_in_db :
         raise StudentNotFound

@@ -19,13 +19,12 @@ class UserIsExists(DetailedHTTPException):
     DETAIL = "User is exists"
 
 
-
-class WeightNotFound(DetailedHTTPException):
-    STATUS_CODE = status.HTTP_404_NOT_FOUND
-    DETAIL = "user is not found" 
-
-
 class WrongValue(DetailedHTTPException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
     DETAIL = "enter the correct values" 
+
+
+class WrongRole(DetailedHTTPException):
+    STATUS_CODE = status.HTTP_405_METHOD_NOT_ALLOWED
+    DETAIL = "This function is only for admins "
 

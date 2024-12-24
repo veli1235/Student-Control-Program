@@ -9,11 +9,15 @@ class DetailedHTTPException(HTTPException):
         
         super().__init__(status_code=self.STATUS_CODE,detail=self.DETAIL)
 
-class StudentNotFound(DetailedHTTPException):
+class CourseNotFound(DetailedHTTPException):
     STATUS_CODE = status.HTTP_404_NOT_FOUND
-    DETAIL = "Student is not found"
+    DETAIL = "Course is not found"
 
 
-class StudentIsExists(DetailedHTTPException):
+class CourseIsExists(DetailedHTTPException):
     STATUS_CODE=status.HTTP_400_BAD_REQUEST
-    DETAIL = "Student is exists"
+    DETAIL = "Course is exists"
+
+class CourseWithActiveRegistrationsException(DetailedHTTPException):
+    STATUS_CODE = status.HTTP_406_NOT_ACCEPTABLE
+    DETAIL = "It is not possible to delete because there is a student registered in this course."

@@ -38,7 +38,7 @@ def delete_user_in_db(*,data:UserDeleteSchema,db:Session, current_user = Depends
     user = db.query(User).filter(User.username == current_user["username"], User.is_deleted == False).first()
     if current_user["username"] == user.username:
         if user.role  == "lecturer":
-            raise HTTPException(status_code=401,detail="This function is only for admins")
+            raise WrongRole
     user_in_db = db.query(User).filter(User.username==data.username).first()
     if not user_in_db:
         raise UserNotFound

@@ -6,7 +6,7 @@ from datetime import datetime, timedelta
 from model import User
 from sqlalchemy.orm import Session
 from db  import get_db
- 
+
 
 
 
@@ -24,13 +24,13 @@ def verify_password(plain_password , hashed_password):
 
 def get_user(db, username:str):
     for i in db :
-        if i["username"]==username and i["is_deleted"] == False:
+        if i["username"]==username and i["is_active"] == True:
             user_dict = i
             return user_dict 
         
     
 def authenticate_user(db: Session, username: str, password: str):
-    user = db.query(User).filter(User.username == username,User.is_deleted == False).first()
+    user = db.query(User).filter(User.username == username).first()
     if not user or not pwd_context.verify(password, user.password):
         return False
     return user

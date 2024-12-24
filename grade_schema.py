@@ -17,6 +17,3 @@ class GradeDeleteSchema(BaseModel):
     course_id : int
     class Config:
         extra = "forbid"
-
-
-
